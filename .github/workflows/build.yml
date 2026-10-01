@@ -1,0 +1,26 @@
+name: Build APK
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.7"
+      - name: Extract Android project
+        run: unzip -q finance-android-project-source.zip -d build-src
+      - name: Build release APK
+        working-directory: build-src/FinanceTracker-sanitized
+        run: gradle assembleRelease --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: finance-tracker-apk
+          path: build-src/FinanceTracker-sanitized/app/build/outputs/apk/release/app-release.apk
